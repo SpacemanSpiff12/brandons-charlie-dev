@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pokémon RPS Arena: Charizard vs. Venusaur vs. Blastoise</title>
+  
+  <!-- Bootstrap 5 CSS & Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <!-- jQuery UI CSS -->
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+
+  <style>
+    body {
+      background-color: #f4f6f9;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .main-content {
+      flex: 1;
+    }
+    /* Mode Styles */
+    .mode-concept {
+      background-color: #ffffff;
+      border: 2px dashed #6c757d;
+      padding: 20px;
+      border-radius: 8px;
+    }
+    .mode-full {
+      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+      color: white;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    }
+    .card-pokemon {
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .card-pokemon:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+    }
+    .hp-bar-container {
+      height: 20px;
+      background-color: #e9ecef;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .hp-bar-fill {
+      height: 100%;
+      transition: width 0.4s ease-in-out, background-color 0.4s;
+    }
+    .badge-type-fire { background-color: #fd7e14; }
+    .badge-type-grass { background-color: #198754; }
+    .badge-type-water { background-color: #0d6efd; }
+  </style>
+</head>
+<body>
+
+  <!-- TOP NAV BAR -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+    <div class="container">
+      <a class="navbar-brand d-flex align-items-center gap-2" href="#">
+        <i class="bi bi-controller fs-3 text-warning"></i>
+        <span class="fw-bold">Kanto RPS Stadium</span>
+      </a>
+      <div class="d-flex align-items-center gap-3">
+        <span class="navbar-text text-light d-none d-sm-inline" id="navGreeting">
+          Welcome, Trainer!
+        </span>
+        <div class="btn-group" role="group">
+          <button type="button" class="btn btn-outline-warning btn-sm active" id="btnConceptMode">
+            <i class="bi bi-pencil-square"></i> Concept Mode
+          </button>
+          <button type="button" class="btn btn-warning btn-sm" id="btnFullMode">
+            <i class="bi bi-robot"></i> Full AI Game
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN GAME AREA -->
+  <div class="container my-4 main-content">
+
+    <!-- USER NAME & GREETING BAR -->
+    <div class="card mb-4 shadow-sm">
+      <div class="card-body d-flex flex-wrap align-items-center justify-content-between gap-3">
+        <div class="d-flex align-items-center gap-2">
+          <i class="bi bi-person-circle fs-3 text-primary"></i>
+          <div>
+            <h6 class="mb-0 fw-bold" id="trainerDisplayName">Guest Trainer</h6>
+            <small class="text-muted" id="trainerStatus">Mode: Guest</small>
+          </div>
+        </div>
+        <div class="d-flex gap-2">
+          <input type="text" id="trainerNameInput" class="form-control form-control-sm" placeholder="Enter Trainer Name" style="max-width: 180px;">
+          <button id="btnSaveName" class="btn btn-primary btn-sm">Save</button>
+          <button id="btnGuestName" class="btn btn-outline-secondary btn-sm">Random Guest</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- MODE 1: CONCEPT MODE (SIMPLE DESIGN, LIGHT AI) -->
+    <!-- ========================================== -->
+    <div id="sectionConceptMode" class="mode-concept">
+      <div class="text-center mb-3">
+        <span class="badge bg-secondary mb-2">Draft / Concept View</span>
+        <h4>Simple Pokémon "Rock-Paper-Scissors"</h4>
+        <p class="text-muted small">Pick a Pokémon to fight the opponent AI.</p>
+      </div>
+
+      <div class="row text-center g-3 mb-4">
+        <div class="col-4">
+          <button class="btn btn-outline-danger w-100 py-3 btn-concept-choice" data-choice="0">
+            🔥<br><strong>Charizard</strong><br><small>(Fire)</small>
+          </button>
+        </div>
+        <div class="col-4">
+          <button class="btn btn-outline-success w-100 py-3 btn-concept-choice" data-choice="1">
+            🌿<br><strong>Venusaur</strong><br><small>(Grass)</small>
+          </button>
+        </div>
+        <div class="col-4">
+          <button class="btn btn-outline-primary w-100 py-3 btn-concept-choice" data-choice="2">
+            💧<br><strong>Blastoise</strong><br><small>(Water)</small>
+          </button>
+        </div>
+      </div>
+
+      <div class="alert alert-info text-center" id="conceptOutput">
+        Select a starter above to begin!
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- MODE 2: FULL GAME MODE (HEAVILY AI-ASSISTED)        -->
+    <!-- ========================================== -->
+    <div id="sectionFullMode" class="mode-full d-none">
+      <div class="d-flex justify-content-between align-items-center mb-4 border-bottom border-light pb-2">
+        <div>
+          <h3 class="mb-0"><i class="bi bi-shield-shaded"></i> Full Battle Arena</h3>
+          <small class="text-info">Enhanced Matchups & Health Tracking</small>
+        </div>
+        <button class="btn btn-light btn-sm fw-bold" data-bs-toggle="modal" data-bs-target="#leaderboardModal">
+          <i class="bi bi-trophy-fill text-warning"></i> Leaderboard & Stats
+        </button>
+      </div>
+
+      <!-- BATTLEFIELD DISPLAY -->
+      <div class="row align-items-center text-center my-4">
+        <!-- Player Arena -->
+        <div class="col-md-5 mb-3 mb-md-0">
+          <div class="p-3 bg-dark bg-opacity-50 rounded-3">
+            <h5 id="playerStarterName">Your Pokémon</h5>
+            <div class="display-1 my-2" id="playerSprite">❓</div>
+            <div class="hp-bar-container my-2">
+              <div id="playerHpBar" class="hp-bar-fill bg-success" style="width: 100%;"></div>
+            </div>
+            <small id="playerHpText">HP: 100 / 100</small>
+          </div>
+        </div>
+
+        <!-- VS Badge -->
+        <div class="col-md-2 my-2">
+          <span class="badge bg-danger fs-4 rounded-circle p-3">VS</span>
+        </div>
+
+        <!-- AI Arena -->
+        <div class="col-md-5">
+          <div class="p-3 bg-dark bg-opacity-50 rounded-3">
+            <h5 id="aiStarterName">Opponent AI</h5>
+            <div class="display-1 my-2" id="aiSprite">❓</div>
+            <div class="hp-bar-container my-2">
+              <div id="aiHpBar" class="hp-bar-fill bg-success" style="width: 100%;"></div>
+            </div>
+            <small id="aiHpText">HP: 100 / 100</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- ACTION BUTTONS -->
+      <div class="row g-3 justify-content-center my-3">
+        <div class="col-md-4">
+          <div class="card card-pokemon bg-dark text-white text-center p-3 border-danger btn-full-choice" data-choice="0">
+            <div class="fs-1">🔥</div>
+            <h5 class="mt-2 text-danger">Charizard</h5>
+            <span class="badge badge-type-fire">Fire</span>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card card-pokemon bg-dark text-white text-center p-3 border-success btn-full-choice" data-choice="1">
+            <div class="fs-1">🌿</div>
+            <h5 class="mt-2 text-success">Venusaur</h5>
+            <span class="badge badge-type-grass">Grass</span>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card card-pokemon bg-dark text-white text-center p-3 border-primary btn-full-choice" data-choice="2">
+            <div class="fs-1">💧</div>
+            <h5 class="mt-2 text-primary">Blastoise</h5>
+            <span class="badge badge-type-water">Water</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- STATUS & CONTROLS -->
+      <div class="text-center mt-4">
+        <div id="battleLog" class="alert alert-light text-dark fw-bold mb-3">
+          Choose your Pokémon to strike!
+        </div>
+        <div class="d-flex justify-content-center gap-2">
+          <button id="btnResetGame" class="btn btn-outline-light btn-sm">
+            <i class="bi bi-arrow-counterclockwise"></i> Reset Match
+          </button>
+          <button id="btnHint" class="btn btn-info btn-sm text-white">
+            <i class="bi bi-lightbulb"></i> Elemental Hint
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="bg-dark text-light py-3 mt-auto">
+    <div class="container text-center small">
+      <p class="mb-1">Pokémon RPS Stadium &copy; 2026 Brandon Harwell</p>
+      <div class="d-flex justify-content-center gap-3">
+        <a href="https://github.com/barrycumbie/pokemon-webgame" id="repoLink" class="text-warning text-decoration-none" target="_blank">
+          <i class="bi bi-github"></i> Game Repository
+        </a>
+        <span class="text-muted">|</span>
+        <a href="https://github.com/barrycumbie" class="text-warning text-decoration-none" target="_blank">
+          <i class="bi bi-person-bounding-box"></i> GitHub Profile
+        </a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- LEADERBOARD & STATS BS5 MODAL -->
+  <div class="modal fade" id="leaderboardModal" tabindex="-1" aria-labelledby="leaderboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-dark text-white">
+          <h5 class="modal-title" id="leaderboardModalLabel"><i class="bi bi-trophy text-warning"></i> Trainer Stats & Leaderboard</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <h6>Session Scoreboard</h6>
+          <ul class="list-group mb-3">
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              Wins
+              <span class="badge bg-success rounded-pill" id="statWins">0</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              Losses
+              <span class="badge bg-danger rounded-pill" id="statLosses">0</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              Ties
+              <span class="badge bg-secondary rounded-pill" id="statTies">0</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              Current Win Streak
+              <span class="badge bg-primary rounded-pill" id="statStreak">0</span>
+            </li>
+          </ul>
+
+          <h6>Recent Matches (sessionStorage)</h6>
+          <div class="table-responsive" style="max-height: 150px;">
+            <table class="table table-sm table-striped">
+              <thead>
+                <tr>
+                  <th>Trainer</th>
+                  <th>Outcome</th>
+                  <th>Time</th>
+                </tr>
+              </thead>
+              <tbody id="historyTableBody">
+                <tr><td colspan="3" class="text-center text-muted">No matches played yet</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCRIPTS: jQuery, jQuery UI, Bootstrap 5 JS -->
+  <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    // GAME DATA & STATE
+    const POKEMON = [
+      { name: "Charizard", type: "Fire", emoji: "🔥" },
+      { name: "Venusaur", type: "Grass", emoji: "🌿" },
+      { name: "Blastoise", type: "Water", emoji: "💧" }
+    ];
+
+    let state = {
+      trainerName: "Guest Trainer",
+      isGuest: true,
+      playerHp: 100,
+      aiHp: 100,
+      wins: 0,
+      losses: 0,
+      ties: 0,
+      streak: 0
+    };
+
+    // RANDOM GUEST NAMES GENERATOR
+    const GUEST_NAMES = ["Ash K.", "Misty S.", "Brock R.", "Red", "Blue", "Ethan"];
+
+    $(document.body).ready(function() {
+      loadSession();
+      updateTrainerDisplay();
+
+      // Mode Switchers
+      $('#btnConceptMode').click(function() {
+        $(this).addClass('active');$('#btnFullMode').removeClass('active');
+        $('#sectionConceptMode').removeClass('d-none');
+        $('#sectionFullMode').addClass('d-none');
+      });
+
+      $('#btnFullMode').click(function() {
+        $(this).addClass('active');$('#btnConceptMode').removeClass('active');
+        $('#sectionFullMode').removeClass('d-none');
+        $('#sectionConceptMode').addClass('d-none');
+      });
+
+      // Name Handlers
+      $('#btnSaveName').click(function() {
+        const val = $('#trainerNameInput').val().trim();
+        if (val) {
+          state.trainerName = val;
+          state.isGuest = false;
+          updateTrainerDisplay();
+          saveSession();
+        }
+      });
+
+      $('#btnGuestName').click(function() {
+        const randomName = GUEST_NAMES[Math.floor(Math.random() * GUEST_NAMES.length)];
+        state.trainerName = randomName + " (Guest)";
+        state.isGuest = true;
+        updateTrainerDisplay();
+        saveSession();
+      });
+
+      // CONCEPT MODE LOGIC
+      $('.btn-concept-choice').click(function() {
+        const pChoice = parseInt($(this).data('choice'));
+        const aiChoice = Math.floor(Math.random() * 3);
+        const result = determineWinner(pChoice, aiChoice);
+
+        let msg = `You chose <strong>${POKEMON[pChoice].name}</strong>. Opponent chose <strong>${POKEMON[aiChoice].name}</strong>.<br>`;
+        if (result === 'win') msg += '<span class="text-success fw-bold">Result: You Win!</span>';
+        else if (result === 'lose') msg += '<span class="text-danger fw-bold">Result: You Lose!</span>';
+        else msg += '<span class="text-warning fw-bold">Result: It\'s a Tie!</span>';
+
+        $('#conceptOutput').html(msg);
+      });
+
+      // FULL GAME MODE LOGIC
+      $('.btn-full-choice').click(function() {
+        if (state.playerHp <= 0 || state.aiHp <= 0) return;
+
+        const pChoice = parseInt($(this).data('choice'));
+        const aiChoice = Math.floor(Math.random() * 3);
+
+        // Update sprites
+        $('#playerStarterName').text(POKEMON[pChoice].name);
+        $('#playerSprite').text(POKEMON[pChoice].emoji);
+        $('#aiStarterName').text(POKEMON[aiChoice].name);
+        $('#aiSprite').text(POKEMON[aiChoice].emoji);
+
+        // Animate strike with jQuery UI Shake
+        $('#playerSprite, #aiSprite').effect('shake', { times: 2, distance: 5 }, 200);
+
+        const result = determineWinner(pChoice, aiChoice);
+        if (result === 'win') {
+          state.aiHp = Math.max(0, state.aiHp - 34);
+          state.wins++;
+          state.streak++;
+          $('#battleLog').html(`Super Effective! ${POKEMON[pChoice].name} hit ${POKEMON[aiChoice].name}!`);
+        } else if (result === 'lose') {
+          state.playerHp = Math.max(0, state.playerHp - 34);
+          state.losses++;
+          state.streak = 0;
+          $('#battleLog').html(`Ouch! ${POKEMON[aiChoice].name} hit ${POKEMON[pChoice].name}!`);
+        } else {
+          state.ties++;
+          $('#battleLog').html("Both Pokémon blocked the attack! It's a draw!");
+        }
+
+        updateHpDisplay();
+        updateStatsDisplay();
+        recordMatchHistory(POKEMON[pChoice].name, POKEMON[aiChoice].name, result);
+        saveSession();
+
+        // Check Battle Ending
+        if (state.playerHp <= 0) {
+          $('#battleLog').addClass('alert-danger').removeClass('alert-light')
+            .html(`<strong>KNOCKOUT!</strong> ${state.trainerName} was defeated! Reset to play again.`);
+        } else if (state.aiHp <= 0) {
+          $('#battleLog').addClass('alert-success').removeClass('alert-light')
+            .html(`<strong>VICTORY!</strong> Opponent Pokémon fainted! You won the battle!`);
+        }
+      });
+
+      // Reset Match
+      $('#btnResetGame').click(function() {
+        state.playerHp = 100;
+        state.aiHp = 100;
+        updateHpDisplay();
+        $('#playerSprite').text('❓');
+        $('#aiSprite').text('❓');
+        $('#playerStarterName').text('Your Pokémon');
+        $('#aiStarterName').text('Opponent AI');
+        $('#battleLog').removeClass('alert-danger alert-success').addClass('alert-light')
+          .text('Choose your Pokémon to strike!');
+      });
+
+      // Hint Button
+      $('#btnHint').click(function() {
+        alert("🔥 Fire beats 🌿 Grass\n🌿 Grass beats 💧 Water\n💧 Water beats 🔥 Fire");
+      });
+
+      // Console Cheat Mode
+      window.cheatMode = function() {
+        state.wins = 99;
+        state.streak = 99;
+        updateStatsDisplay();
+        saveSession();
+        console.log("Cheat Mode Enabled: 99 Wins!");
+      };
+    });
+
+    // WIN DETERMINATION MATRIX
+    // 0 = Fire, 1 = Grass, 2 = Water
+    function determineWinner(p, ai) {
+      if (p === ai) return 'tie';
+      if ((p === 0 && ai === 1) || (p === 1 && ai === 2) || (p === 2 && ai === 0)) return 'win';
+      return 'lose';
+    }
+
+    function updateHpDisplay() {
+      $('#playerHpBar').css('width', state.playerHp + '%');
+      $('#playerHpText').text(`HP: ${state.playerHp} / 100`);
+      $('#aiHpBar').css('width', state.aiHp + '%');
+      $('#aiHpText').text(`HP: ${state.aiHp} / 100`);
+    }
+
+    function updateTrainerDisplay() {
+      $('#trainerDisplayName').text(state.trainerName);
+      $('#navGreeting').text(`Welcome, ${state.trainerName}!`);
+      $('#trainerStatus').text(state.isGuest ? 'Mode: Guest' : 'Mode: Registered');
+    }
+
+    function updateStatsDisplay() {
+      $('#statWins').text(state.wins);
+      $('#statLosses').text(state.losses);
+      $('#statTies').text(state.ties);
+      $('#statStreak').text(state.streak);
+    }
+
+    function saveSession() {
+      sessionStorage.setItem('pokemonGameData', JSON.stringify(state));
+    }
+
+    function loadSession() {
+      const stored = sessionStorage.getItem('pokemonGameData');
+      if (stored) {
+        state = { ...state, ...JSON.parse(stored) };
+        updateStatsDisplay();
+      }
+    }
+
+    function recordMatchHistory(playerPkm, aiPkm, outcome) {
+      let history = JSON.parse(sessionStorage.getItem('matchHistory')) || [];
+      const entry = {
+        trainer: state.trainerName,
+        outcome: outcome.toUpperCase(),
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      };
+      history.unshift(entry);
+      if (history.length > 5) history.pop();
+      sessionStorage.setItem('matchHistory', JSON.stringify(history));
+
+      // Update Modal Table
+      let rows = '';
+      history.forEach(h => {
+        rows += `<tr><td>${h.trainer}</td><td>${h.outcome}</td><td>${h.time}</td></tr>`;
+      });
+      $('#historyTableBody').html(rows);
+    }
+  </script>
+</body>
+</html>
