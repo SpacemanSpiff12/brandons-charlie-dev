@@ -16,8 +16,8 @@ Step into the Kanto arena as a Pokémon Trainer! Choose your starter—Charizard
 ## About the App
 
 ### Links
-- [Brainstorming Issue & 5 Game Ideas]((https://github.com/SpacemanSpiff12/brandons-charlie-dev/issues/1))
-- [Wiki & Layout Wireframe](https://github.com/SpacemanSpiff12/brandons-charlie-dev/wiki/Wireframe))
+- [Brainstorming Issue & 5 Game Ideas] https://github.com/SpacemanSpiff12/brandons-charlie-dev/issues/1
+- [Wiki & Layout Wireframe](https://github.com/SpacemanSpiff12/brandons-charlie-dev/wiki/Wireframe)
 - [Sprint 99 Future Ideas Milestone](https://github.com/SpacemanSpiff12/brandons-charlie-dev/milestone/1)
 
 ### Directory Structure
